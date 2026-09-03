@@ -8,7 +8,7 @@ This project analyzes procurement spend, supplier performance, and payment cover
 
 ---
 
-## ⭐ Key Highlights
+## ⭐ Highlights
 
 * Designed a **relational data model** across Suppliers, Purchase Orders, and Payments with validated PK/FK relationships.
 * Used **data-derived benchmarks** rather than arbitrary thresholds to identify high-spend and below-average suppliers.
@@ -119,7 +119,7 @@ ORDER BY Spend DESC;
 | Fisher PLC | $26.9M |   3.40 |
 | Jackson-Yu | $25.8M |   3.50 |
 
-⭐ **Only 2 of 50 suppliers** combine above-average spend with below-average ratings.
+**Only 2 of 50 suppliers** combine above-average spend with below-average ratings.
 
 These suppliers represent the clearest candidates for **pricing, service-level, and contract-performance review**.
 
@@ -191,24 +191,21 @@ Of the 5,000 purchase orders:
 
 # 📈 Power BI Dashboard
 
-### Page 1 — Procurement Overview
+## Procurement Overview
 
-Provides the overall procurement context:
+Overview of total spend, monthly trends, category concentration, and payment status.
 
-* Total Spend
-* Monthly Spend Trend
-* Spend by Category
-* Payment Status
+![Procurement Overview Dashboard](Screenshots/Procurement%20Overview%20dashboard%20.png)
 
-### Page 2 — Supplier Performance
+---
 
-Focuses on supplier-level decision making:
+## Supplier Performance
 
-* **Spend vs. Rating Quadrant** using data-derived benchmarks
-* Top 10 Suppliers by Spend
-* Detailed Supplier Performance Table
+Supplier-level analysis highlighting high-spend and below-average-performing suppliers through the spend-vs-rating quadrant.
 
-🎯 The quadrant is the core analytical visual, allowing decision-makers to quickly identify suppliers with **high financial exposure and weaker performance**.
+![Supplier Performance Dashboard](Screenshots/Supplier%20Performance%20dashboard%20.png)
+
+🎯 The **spend-vs-rating quadrant** is the core analytical visual, allowing decision-makers to quickly identify suppliers with high financial exposure and weaker performance.
 
 ---
 
