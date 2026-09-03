@@ -1,137 +1,240 @@
-# 🏢 Procurement Spend & Supplier Performance Analysis
+# 📊 Procurement Spend & Supplier Performance Analysis
 
-## 📌 Business Problem
-> **Are we getting enough value from our suppliers relative to what we spend with them?**
+## 🎯 Business Question
 
-Management needs to understand whether high procurement spend is justified by strong supplier performance, or if certain suppliers require review.
+**Are we getting enough value from our suppliers relative to what we spend with them?**
 
----
-
-## 🛠️ Tools Used
-- **Python** – Synthetic data generation (`pandas`, `numpy`)
-- **SQL Server** – Data profiling, cleaning, modeling, and analysis
-- **Power BI** – Interactive dashboard and visualization
-- **GitHub** – Version control and project documentation
+This project analyzes procurement spend, supplier performance, and payment coverage to identify **supplier risk, spend concentration, and potential process issues**.
 
 ---
 
-## 📊 Data Overview
+## ⭐ Key Highlights
 
-### Data Generation (Python)
-The dataset was generated using **Python** (`pandas` and `numpy`) to simulate real-world procurement data, including:
-
-- **Suppliers** – Name, category, region, rating, contract status
-- **Purchase Orders** – Product, quantity, price, order date, delivery days
-- **Payments** – Amount, date, status
-
-The data was intentionally designed with **realistic data quality issues** (missing values, duplicates, typos, invalid entries) to mimic actual organizational data.
-
-### Datasets
-| Table | Description | Rows (Raw) | Rows (Clean) |
-|-------|-------------|------------|--------------|
-| `suppliers_messy` | Raw supplier master data | 52 | 50 |
-| `purchase_orders_messy` | Raw purchase transactions | 5,003 | 5,000 |
-| `payments_messy` | Raw payment records | 6,256 | 6,253 |
-
-### Data Quality Issues Identified & Resolved
-| Issue | Discovery | Action Taken |
-|-------|-----------|--------------|
-| Duplicate Suppliers | `SUP-005`, `SUP-013` appeared twice | Removed using `SELECT DISTINCT` |
-| Missing Supplier Ratings | 3 suppliers had `NULL` rating | Investigated and imputed with category average |
-| Invalid Delivery Days | `-5` days recorded | Replaced with `NULL` and excluded from analysis |
-| Inconsistent Categories | "Electronics" vs "ELECTRONICS" | Standardized using `UPPER()` and `TRIM()` |
-| Missing Payment Status | 3 records with `NULL` status | Set to `Pending` |
-| Overpayments | 3 cases due to duplicates | Resolved after removing duplicates |
+* Designed a **relational data model** across Suppliers, Purchase Orders, and Payments with validated PK/FK relationships.
+* Used **data-derived benchmarks** rather than arbitrary thresholds to identify high-spend and below-average suppliers.
+* Identified and fixed a **fan-out / row-duplication issue** caused by the 1-to-many Purchase Order → Payments relationship by aggregating each side independently before joining.
+* Found that **69% of total spend is concentrated in Professional Services across only 7 suppliers**, highlighting concentration risk.
+* Identified **Fisher PLC and Jackson-Yu** as the only suppliers combining high spend with below-average ratings.
+* Built a two-page Power BI dashboard centered on a **spend-vs-rating quadrant** to directly support supplier risk assessment.
+* Cross-checked key dashboard metrics against SQL results to ensure consistency.
 
 ---
 
-## 🔍 SQL Process
+## 🛠️ Tools
 
-### 1. Data Profiling (`01_Data_Profiling.sql`)
-- Checked total row counts
-- Identified duplicates and missing values
-- Validated data types and ranges
-- Analyzed categorical distributions
+**Python** · **SQL Server** · **Power BI** · **DAX**
 
-### 2. Data Cleaning (`02_Data_Cleaning.sql`)
-- Removed exact duplicates using `SELECT DISTINCT`
-- Handled missing ratings
-- Standardized text fields
-- Converted data types for consistency
-
-### 3. Data Modeling (`08-10_Data_Modeling_*.sql`)
-- Created Primary Keys on all tables
-- Established Foreign Key relationships
-- Validated referential integrity
-
-### 4. Procurement Overview (`11_Procurement_Overview.sql`)
-- Total spend: **$284.55M**
-- Total orders: **5,000**
-- Spend by department and category
-- Payment vs outstanding analysis
-
-### 5. Supplier Analysis (`13_Supplier_Analysis.sql`)
-- **Top 7 suppliers** account for **$197M** (69% of total spend)
-- **Fisher PLC**: $26.94M spend | 3.40 rating | 67.75% coverage
-- **Jackson-Yu**: $25.83M spend | 3.50 rating | 70.14% coverage
-- **Martinez-Jacobs**: $27.07M spend | 25-day delivery | Expired contract
-
-### 6. Payment Analysis (`14_Payment_Analysis.sql`)
-- Total paid: **$252.06M**
-- Outstanding: **$32.49M** (562 unpaid orders)
-- Payment coverage ranges from **58.59%** to **81.86%**
+Python was used for synthetic data generation, SQL Server for cleaning, modeling and analysis, and Power BI for visualization and reporting.
 
 ---
 
-## 📊 Dashboard
+## 📦 Data
 
-### Page 1: Executive Overview
-- **KPIs**: Total Orders, Purchase Cost, Paid Amount, Outstanding, Payment Rate
-- **Trend**: Purchase Cost over time
-- **Category Analysis**: Spend by Product Category
-- **Payment Status**: Paid vs Pending distribution
-- **Slicers**: Order Date, Product Category, Order Status
+| Table           |  Rows |
+| --------------- | ----: |
+| Suppliers       |    50 |
+| Purchase Orders | 5,000 |
+| Payments        | 6,253 |
 
-### Page 2: Supplier Performance
-- **KPIs**: Total Suppliers, Active Suppliers, Average Rating
-- **Spend vs Rating Matrix**: Scatter plot with 4 quadrants
-- **Top 10 Suppliers**: By spend
-- **Supplier Summary Table**: Supplier name, spend, and rating
-- **Slicers**: Region, Supplier Category, Contract Status
+### 🧹 Data Preparation
 
----
+The dataset was profiled and cleaned before analysis, including:
 
-## 🔍 Key Insights
+* Duplicate supplier IDs
+* Inconsistent category text
+* Invalid negative delivery values
+* Missing supplier ratings
 
-1. **High spend does NOT always mean high performance**  
-   - **Fisher PLC** ($26.94M, rating 3.40) and **Jackson-Yu** ($25.83M, rating 3.50) are high-spend suppliers with below-average ratings.
-
-2. **Supplier risk is not concentrated in one supplier**  
-   - **Martinez-Jacobs** ($27.07M, rating 4.80) has an expired contract and slow delivery (25 days).
-   - **Colon, Camacho and Williams** ($6.40M) has an expired contract and missing rating.
-
-3. **Professional Services dominates spending**  
-   - 69% of total spend ($197M) goes to Professional Services.
-
-4. **Outstanding payments require attention**  
-   - $32.49M outstanding across 562 unpaid orders (11.24% of total orders).
+Three suppliers had missing ratings. These were retained as `NULL` and excluded from rating-based analysis rather than imputed, avoiding assumptions that could bias the results.
 
 ---
 
-## 💡 Recommendations
+## 🔄 Analytical Process
 
-1. **Review Fisher PLC and Jackson-Yu**  
-   - Investigate performance issues and renegotiate contracts.
-
-2. **Renew Martinez-Jacobs' contract**  
-   - Address delivery delays despite strong rating.
-
-3. **Follow up on outstanding payments**  
-   - Improve cash flow visibility and payment reconciliation.
-
-4. **Diversify Professional Services suppliers**  
-   - Reduce dependency on a single category.
+1. **Profiling** — row counts, duplicates, null audit, and range validation
+2. **Cleaning** — deduplication, text standardization, and invalid-value handling
+3. **Modeling** — primary/foreign keys and validated relationships
+4. **Analysis** — spend, supplier performance, and payment coverage
+5. **Visualization** — Power BI dashboard and SQL cross-checking
 
 ---
 
-## 📁 Project Structure
+# 🔍 Key Analysis & Results
+
+## 1️⃣ Where Does the Spend Go?
+
+```sql
+SELECT
+    Product_Category,
+    SUM(Total_Cost) AS Total_Spend,
+    COUNT(DISTINCT PO_ID) AS Order_Count
+FROM purchase_orders_clean
+GROUP BY Product_Category
+ORDER BY Total_Spend DESC;
+```
+
+| Category              |    Spend | % of Total |
+| --------------------- | -------: | ---------: |
+| Professional Services | $197.02M |    **69%** |
+| Technology            |  $30.50M |        11% |
+| Marketing             |  $18.46M |         6% |
+| Facilities            |  $18.27M |         6% |
+| Logistics             |  $14.76M |         5% |
+| Office Supplies       |   $5.54M |         2% |
+
+**Total spend: $284.55M across 5,000 purchase orders.**
+
+💡 **Key insight:** 69% of procurement spend is concentrated in one category across only 7 suppliers, creating a clear **supplier concentration risk**.
+
+---
+
+## 2️⃣ Which Suppliers Combine High Spend With Weak Performance?
+
+Benchmarks were derived from the dataset rather than selected arbitrarily:
+
+* Average spend per supplier: **$5.69M**
+* Average supplier rating: **4.06**
+* Average delivery time: **24 days**
+
+```sql
+SELECT
+    s.Supplier_Name,
+    s.Supplier_Rating,
+    SUM(po.Total_Cost) AS Spend
+FROM suppliers_clean s
+JOIN purchase_orders_clean po
+    ON s.Supplier_ID = po.Supplier_ID
+WHERE s.Supplier_Rating IS NOT NULL
+GROUP BY
+    s.Supplier_Name,
+    s.Supplier_Rating
+HAVING
+    SUM(po.Total_Cost) > 5690983.37
+    AND s.Supplier_Rating < 4.064948
+ORDER BY Spend DESC;
+```
+
+| Supplier   |  Spend | Rating |
+| ---------- | -----: | -----: |
+| Fisher PLC | $26.9M |   3.40 |
+| Jackson-Yu | $25.8M |   3.50 |
+
+⭐ **Only 2 of 50 suppliers** combine above-average spend with below-average ratings.
+
+These suppliers represent the clearest candidates for **pricing, service-level, and contract-performance review**.
+
+---
+
+## 3️⃣ Payment Coverage & the SQL Bug Fix
+
+An initial payment-coverage query produced inflated spend because the Purchase Order → Payments relationship is **1-to-many**.
+
+The issue was identified and corrected by aggregating spend and payments independently before joining:
+
+```sql
+WITH SupplierSpend AS (
+    SELECT
+        Supplier_ID,
+        SUM(Total_Cost) AS Spend
+    FROM purchase_orders_clean
+    GROUP BY Supplier_ID
+),
+SupplierPaid AS (
+    SELECT
+        po.Supplier_ID,
+        SUM(p.Payment_Amount) AS Paid
+    FROM purchase_orders_clean po
+    JOIN payments_clean p
+        ON po.PO_ID = p.PO_ID
+    GROUP BY po.Supplier_ID
+)
+SELECT
+    s.Supplier_Name,
+    ss.Spend,
+    sp.Paid,
+    sp.Paid * 100.0 / ss.Spend AS Coverage_Pct
+FROM suppliers_clean s
+JOIN SupplierSpend ss
+    ON s.Supplier_ID = ss.Supplier_ID
+JOIN SupplierPaid sp
+    ON s.Supplier_ID = sp.Supplier_ID
+ORDER BY Coverage_Pct ASC;
+```
+
+### Result
+
+| Metric                       |            Result |
+| ---------------------------- | ----------------: |
+| Payment coverage range       | **76.6% – 99.9%** |
+| Suppliers below 70% coverage |             **0** |
+| Fisher PLC coverage          |         **83.2%** |
+| Jackson-Yu coverage          |         **88.4%** |
+
+💡 No supplier is simultaneously weak across **spend, rating, and payment coverage**.
+
+This shows that the identified issues are **distributed across different suppliers rather than concentrated in one supplier**.
+
+---
+
+## 4️⃣ What's the Outstanding Balance?
+
+Of the 5,000 purchase orders:
+
+* **4,438 (89%)** have an actual payment greater than $0.
+* **562 orders** have no recorded payment greater than $0.
+* These orders represent **$32.49M** in outstanding order value.
+* **531 payment entries** contain a $0 amount.
+
+⚠️ The zero-value entries suggest a **potential payment-logging/process gap**, rather than simply missing payment records.
+
+---
+
+# 📈 Power BI Dashboard
+
+### Page 1 — Procurement Overview
+
+Provides the overall procurement context:
+
+* Total Spend
+* Monthly Spend Trend
+* Spend by Category
+* Payment Status
+
+### Page 2 — Supplier Performance
+
+Focuses on supplier-level decision making:
+
+* **Spend vs. Rating Quadrant** using data-derived benchmarks
+* Top 10 Suppliers by Spend
+* Detailed Supplier Performance Table
+
+🎯 The quadrant is the core analytical visual, allowing decision-makers to quickly identify suppliers with **high financial exposure and weaker performance**.
+
+---
+
+# 💡 Key Findings
+
+### 💰 Spend Concentration
+
+**69% of total spend** is concentrated in Professional Services across only 7 suppliers.
+
+### ⚠️ Supplier Performance
+
+**Fisher PLC and Jackson-Yu** are the only suppliers combining high spend with below-average ratings.
+
+### 📋 Contract Review
+
+**Martinez-Jacobs** has the highest rating in the dataset (4.80) despite an expired contract. This is a **contract-management issue rather than a performance concern** and warrants review before renewal.
+
+### 💳 Payment Process
+
+**$32.49M** in orders have no recorded payment greater than $0, with 531 zero-value payment entries indicating a potential payment-logging gap.
+
+---
+
+# 📌 Recommendations
+
+1. **Review pricing and performance terms** with Fisher PLC and Jackson-Yu given their high financial exposure and below-average ratings.
+2. **Review Martinez-Jacobs' expired contract** before renewal, given its strong supplier performance.
+3. **Investigate zero-value payment entries** with Finance to determine whether they reflect a system or process issue.
+4. **Diversify Professional Services suppliers** to reduce dependency on a small supplier base.
